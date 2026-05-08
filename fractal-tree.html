@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fractal Tree</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; overflow: hidden; }
+    canvas { display: block; }
+    a#back, button {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s;
+      font-family: system-ui, sans-serif;
+      text-decoration: none;
+    }
+    a#back:hover, button:hover { background: rgba(255,255,255,0.18); }
+    #back { position: fixed; top: 20px; left: 24px; }
+    #ui { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
+    #hint { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 12px; font-family: system-ui, sans-serif; letter-spacing: 0.05em; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <a id="back" href="index.html">← Gallery</a>
+  <div id="hint">FRACTAL TREE &nbsp;·&nbsp; sways in the wind &nbsp;·&nbsp; click to grow a new tree</div>
+  <div id="ui">
+    <button id="btn-new">New Tree</button>
+    <button id="btn-season">Change Season</button>
+    <button id="btn-save">Save Image</button>
+  </div>
+  <script>
+    const SEASONS = [
+      { trunk: '#5c3d2e', branch: '#7a5230', leaf: ['#2d6a4f','#40916c','#74c69d','#52b788'], name: 'Summer' },
+      { trunk: '#6b4226', branch: '#8b5a2b', leaf: ['#e76f51','#f4a261','#e9c46a','#d62828'], name: 'Autumn' },
+      { trunk: '#4a4e69', branch: '#6b6f8a', leaf: ['#c8d6e5','#dfe6ee','#a8b2c1','#e8edf2'], name: 'Winter' },
+      { trunk: '#5c3d2e', branch: '#7a5230', leaf: ['#b7e4c7','#d8f3dc','#95d5b2','#74c69d'], name: 'Spring' },
+    ];
+    let seasonIdx = 0;
+    new p5(function(p) {
+      let windTime = 0, windStrength, trunkLen, angleVar, trunkHue;
+
+      function randomize() {
+        windStrength = p.random(0.012, 0.035);
+        trunkLen = p.random(p.height * 0.18, p.height * 0.28);
+        angleVar = p.random(0.3, 0.52);
+      }
+
+      function branch(len, depth, windOffset) {
+        if (depth === 0 || len < 2) return;
+        const season = SEASONS[seasonIdx];
+        const thickness = p.map(depth, 0, 10, 0.8, len * 0.12);
+        const isLeaf = depth <= 2;
+
+        if (isLeaf) {
+          const leafCol = p.color(p.random(season.leaf));
+          leafCol.setAlpha(200);
+          p.stroke(leafCol);
+          p.strokeWeight(thickness * 1.6);
+        } else {
+          const t = p.map(depth, 2, 10, 0, 1);
+          const c = p.lerpColor(p.color(season.branch), p.color(season.trunk), t);
+          p.stroke(c);
+          p.strokeWeight(thickness);
+        }
+
+        p.line(0, 0, 0, -len);
+        p.translate(0, -len);
+
+        const wind = Math.sin(windTime + windOffset) * windStrength * (11 - depth);
+        const leftAngle  = -(angleVar + wind * 0.5);
+        const rightAngle =  (angleVar - wind * 0.5);
+        const shrink = p.random(0.62, 0.72);
+
+        p.push(); p.rotate(leftAngle);  branch(len * shrink, depth - 1, windOffset + 0.4); p.pop();
+        p.push(); p.rotate(rightAngle); branch(len * shrink, depth - 1, windOffset - 0.4); p.pop();
+      }
+
+      p.setup = function() {
+        const cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+        cnv.style('display','block');
+        p.frameRate(60);
+        randomize();
+      };
+
+      p.draw = function() {
+        p.background(10, 10, 15, 30);
+        windTime += 0.018;
+        p.push();
+        p.translate(p.width / 2, p.height);
+        branch(trunkLen, 10, 0);
+        p.pop();
+      };
+
+      p.mousePressed = function() {
+        if (p.mouseY > p.height - 80) return;
+        randomize();
+      };
+
+      p.windowResized = function() {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        randomize();
+      };
+
+      document.getElementById('btn-new').addEventListener('click', randomize);
+      document.getElementById('btn-season').addEventListener('click', () => { seasonIdx=(seasonIdx+1)%SEASONS.length; });
+      document.getElementById('btn-save').addEventListener('click', () => { p.saveCanvas('fractal-tree','png'); });
+    });
+  </script>
+</body>
+</html>

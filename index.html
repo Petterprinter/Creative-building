@@ -3,187 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flow Field</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <title>Generative Art</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; overflow: hidden; }
-    canvas { display: block; }
-
-    #ui {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 12px;
-      z-index: 10;
-    }
-    button {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
+    body {
+      background: #0a0a0f;
       color: #fff;
-      padding: 8px 18px;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 60px 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    header h1 {
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #00f5d4, #9b5de5, #f15bb5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      margin-top: 12px;
+      color: rgba(255,255,255,0.4);
+      font-size: 15px;
+      letter-spacing: 0.04em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 20px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.25s, border-color 0.25s, background 0.25s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.07);
+    }
+    .card-preview {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-preview canvas-placeholder {
+      position: absolute;
+      inset: 0;
+    }
+    .card-body {
+      padding: 24px;
+    }
+    .card-body h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .card-body p {
       font-size: 13px;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: background 0.2s;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
     }
-    button:hover { background: rgba(255,255,255,0.18); }
-
-    #hint {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255,255,255,0.25);
-      font-size: 12px;
-      font-family: system-ui, sans-serif;
-      letter-spacing: 0.05em;
-      pointer-events: none;
+    .tag {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
     }
+    .c1 { background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 50%, #0d1b2a 100%); }
+    .c2 { background: linear-gradient(135deg, #0a0a0f 0%, #1a0a0a 50%, #2a1500 100%); }
+    .c3 { background: linear-gradient(135deg, #0a0a0f 0%, #0a1a0a 50%, #001a0a 100%); }
   </style>
 </head>
 <body>
-  <div id="hint">FLOW FIELD &nbsp;·&nbsp; click to disturb &nbsp;·&nbsp; drag to paint</div>
-  <div id="ui">
-    <button id="btn-palette">Change Palette</button>
-    <button id="btn-reset">Reset</button>
-    <button id="btn-save">Save Image</button>
+  <header>
+    <h1>Generative Art</h1>
+    <p>Code that makes visuals &nbsp;·&nbsp; click a sketch to explore</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="flow-field.html">
+      <div class="card-preview c1">🌊</div>
+      <div class="card-body">
+        <h2>Flow Field</h2>
+        <p>Hundreds of particles drifting through invisible Perlin noise currents, leaving glowing trails on a dark canvas.</p>
+        <span class="tag">Particles · Noise</span>
+      </div>
+    </a>
+
+    <a class="card" href="spirograph.html">
+      <div class="card-preview c2">✨</div>
+      <div class="card-body">
+        <h2>Spirograph</h2>
+        <p>Rotating circles trace intricate geometric curves that bloom into mesmerising symmetrical patterns.</p>
+        <span class="tag">Geometry · Curves</span>
+      </div>
+    </a>
+
+    <a class="card" href="fractal-tree.html">
+      <div class="card-preview c3">🌿</div>
+      <div class="card-body">
+        <h2>Fractal Tree</h2>
+        <p>A recursive branching tree that grows from a single trunk, swaying gently in a simulated breeze.</p>
+        <span class="tag">Fractal · Recursion</span>
+      </div>
+    </a>
   </div>
-
-  <script>
-    const PALETTES = [
-      ['#00f5d4','#00bbf9','#9b5de5','#f15bb5','#fee440'],
-      ['#ff6b6b','#ffa94d','#ffe066','#ff6b6b','#c0392b'],
-      ['#023e8a','#0096c7','#48cae4','#ade8f4','#90e0ef'],
-      ['#2d6a4f','#40916c','#74c69d','#b7e4c7','#52b788'],
-      ['#ff99c8','#fcf6bd','#d0f4de','#a9def9','#e4c1f9'],
-      ['#ffffff','#cccccc','#999999','#666666','#333333'],
-    ];
-
-    let paletteIndex = 0;
-    let particles = [];
-    let noiseScale = 0.003;
-    let noiseStrength = 2.8;
-    let particleCount = 900;
-    let zOffset = 0;
-    let bg;
-
-    new p5(function(p) {
-
-      function makeParticle() {
-        const palette = PALETTES[paletteIndex];
-        return {
-          x: p.random(p.width),
-          y: p.random(p.height),
-          vx: 0,
-          vy: 0,
-          age: p.random(100, 400),
-          maxAge: p.random(100, 400),
-          color: p.random(palette),
-          size: p.random(0.8, 2.0),
-        };
-      }
-
-      function resetParticles() {
-        particles = Array.from({ length: particleCount }, makeParticle);
-      }
-
-      function clearCanvas() {
-        bg.background(10, 10, 15);
-        p.clear();
-        p.image(bg, 0, 0);
-      }
-
-      p.setup = function() {
-        const cnv = p.createCanvas(p.windowWidth, p.windowHeight);
-        cnv.style('display', 'block');
-        bg = p.createGraphics(p.width, p.height);
-        p.colorMode(p.RGB, 255, 255, 255, 255);
-        bg.background(10, 10, 15);
-        p.frameRate(60);
-        resetParticles();
-      };
-
-      p.draw = function() {
-        bg.noStroke();
-        bg.fill(10, 10, 15, 8);
-        bg.rect(0, 0, p.width, p.height);
-
-        zOffset += 0.0004;
-
-        for (let i = 0; i < particles.length; i++) {
-          let pt = particles[i];
-
-          const angle = p.noise(pt.x * noiseScale, pt.y * noiseScale, zOffset) * p.TWO_PI * noiseStrength;
-          pt.vx = pt.vx * 0.9 + Math.cos(angle) * 0.8;
-          pt.vy = pt.vy * 0.9 + Math.sin(angle) * 0.8;
-          pt.x += pt.vx;
-          pt.y += pt.vy;
-          pt.age--;
-
-          const life = pt.age / pt.maxAge;
-          const alpha = life < 0.15
-            ? p.map(life, 0, 0.15, 0, 220)
-            : p.map(life, 0.15, 1.0, 220, 180);
-
-          const col = p.color(pt.color);
-          col.setAlpha(alpha);
-          bg.stroke(col);
-          bg.strokeWeight(pt.size);
-          bg.point(pt.x, pt.y);
-
-          if (
-            pt.age <= 0 ||
-            pt.x < -10 || pt.x > p.width + 10 ||
-            pt.y < -10 || pt.y > p.height + 10
-          ) {
-            particles[i] = makeParticle();
-          }
-        }
-
-        p.image(bg, 0, 0);
-      };
-
-      p.mouseDragged = p.mousePressed = function() {
-        if (p.mouseY > p.height - 80) return;
-        const burst = 30;
-        for (let i = 0; i < burst; i++) {
-          const pt = makeParticle();
-          pt.x = p.mouseX + p.random(-20, 20);
-          pt.y = p.mouseY + p.random(-20, 20);
-          pt.age = p.random(60, 200);
-          pt.maxAge = pt.age;
-          particles.push(pt);
-        }
-        if (particles.length > particleCount * 2) {
-          particles.splice(0, burst);
-        }
-      };
-
-      p.windowResized = function() {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-        bg = p.createGraphics(p.width, p.height);
-        bg.background(10, 10, 15);
-        resetParticles();
-      };
-
-      document.getElementById('btn-palette').addEventListener('click', () => {
-        paletteIndex = (paletteIndex + 1) % PALETTES.length;
-        resetParticles();
-      });
-
-      document.getElementById('btn-reset').addEventListener('click', () => {
-        clearCanvas();
-        resetParticles();
-      });
-
-      document.getElementById('btn-save').addEventListener('click', () => {
-        p.saveCanvas('flow-field', 'png');
-      });
-    });
-  </script>
 </body>
 </html>
