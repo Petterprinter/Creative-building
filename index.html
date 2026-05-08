@@ -6,95 +6,23 @@
   <title>Generative Art</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0a0a0f;
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      padding: 60px 24px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 64px;
-    }
-    header h1 {
-      font-size: clamp(2rem, 6vw, 4rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #00f5d4, #9b5de5, #f15bb5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    header p {
-      margin-top: 12px;
-      color: rgba(255,255,255,0.4);
-      font-size: 15px;
-      letter-spacing: 0.04em;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.25s, border-color 0.25s, background 0.25s;
-      display: flex;
-      flex-direction: column;
-    }
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.07);
-    }
-    .card-preview {
-      height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      position: relative;
-      overflow: hidden;
-    }
-    .card-preview canvas-placeholder {
-      position: absolute;
-      inset: 0;
-    }
-    .card-body {
-      padding: 24px;
-    }
-    .card-body h2 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .card-body p {
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-      line-height: 1.6;
-    }
-    .tag {
-      display: inline-block;
-      margin-top: 14px;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.07);
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-    }
-    .c1 { background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 50%, #0d1b2a 100%); }
-    .c2 { background: linear-gradient(135deg, #0a0a0f 0%, #1a0a0a 50%, #2a1500 100%); }
-    .c3 { background: linear-gradient(135deg, #0a0a0f 0%, #0a1a0a 50%, #001a0a 100%); }
+    body { background: #0a0a0f; color: #fff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; padding: 60px 24px; }
+    header { text-align: center; margin-bottom: 64px; }
+    header h1 { font-size: clamp(2rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(135deg, #00f5d4, #9b5de5, #f15bb5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    header p { margin-top: 12px; color: rgba(255,255,255,0.4); font-size: 15px; letter-spacing: 0.04em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit; transition: transform 0.25s, border-color 0.25s, background 0.25s; display: flex; flex-direction: column; }
+    .card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+    .card-preview { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 44px; }
+    .card-body { padding: 22px; }
+    .card-body h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .card-body p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+    .tag { display: inline-block; margin-top: 14px; font-size: 11px; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .c1 { background: linear-gradient(135deg, #0a0a0f, #1a0a2e, #0d1b2a); }
+    .c2 { background: linear-gradient(135deg, #0a0a0f, #1a0a0a, #2a1500); }
+    .c3 { background: linear-gradient(135deg, #0a0a0f, #0a1a0a, #001a0a); }
+    .c4 { background: linear-gradient(135deg, #0a0a0f, #0a1a2a, #001020); }
+    .c5 { background: linear-gradient(135deg, #0a0a0f, #0a0a1a, #0a0020); }
   </style>
 </head>
 <body>
@@ -102,17 +30,15 @@
     <h1>Generative Art</h1>
     <p>Code that makes visuals &nbsp;·&nbsp; click a sketch to explore</p>
   </header>
-
   <div class="grid">
     <a class="card" href="flow-field.html">
       <div class="card-preview c1">🌊</div>
       <div class="card-body">
         <h2>Flow Field</h2>
-        <p>Hundreds of particles drifting through invisible Perlin noise currents, leaving glowing trails on a dark canvas.</p>
-        <span class="tag">Particles · Noise</span>
+        <p>Particles drift through invisible Perlin noise currents, leaving glowing trails. Drag to play notes.</p>
+        <span class="tag">Particles · Noise · Audio</span>
       </div>
     </a>
-
     <a class="card" href="spirograph.html">
       <div class="card-preview c2">✨</div>
       <div class="card-body">
@@ -121,13 +47,28 @@
         <span class="tag">Geometry · Curves</span>
       </div>
     </a>
-
     <a class="card" href="fractal-tree.html">
       <div class="card-preview c3">🌿</div>
       <div class="card-body">
         <h2>Fractal Tree</h2>
         <p>A recursive branching tree that grows from a single trunk, swaying gently in a simulated breeze.</p>
         <span class="tag">Fractal · Recursion</span>
+      </div>
+    </a>
+    <a class="card" href="ripples.html">
+      <div class="card-preview c4">💧</div>
+      <div class="card-body">
+        <h2>Ripples</h2>
+        <p>Click or drag to send colorful ripples across a still dark pond. Each touch plays a soft tone.</p>
+        <span class="tag">Water · Interactive · Audio</span>
+      </div>
+    </a>
+    <a class="card" href="constellation.html">
+      <div class="card-preview c5">✨</div>
+      <div class="card-body">
+        <h2>Constellation</h2>
+        <p>Stars drift slowly through the dark, drawing faint lines between neighbours to form constellations.</p>
+        <span class="tag">Stars · Ambient</span>
       </div>
     </a>
   </div>
