@@ -6,95 +6,48 @@
   <title>Ripples</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; overflow: hidden; }
-    canvas { display: block; }
-    a#back, button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; cursor: pointer; backdrop-filter: blur(8px); transition: background 0.2s; font-family: system-ui, sans-serif; text-decoration: none; }
-    a#back:hover, button:hover { background: rgba(255,255,255,0.18); }
-    #back { position: fixed; top: 20px; left: 24px; z-index: 10; }
-    #ui { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
-    #hint { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 12px; font-family: system-ui, sans-serif; letter-spacing: 0.05em; pointer-events: none; }
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;flex-wrap:wrap;justify-content:center}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
   </style>
 </head>
 <body>
   <a id="back" href="index.html">← Gallery</a>
-  <div id="hint">RIPPLES &nbsp;·&nbsp; click or drag to create ripples &amp; play tones</div>
+  <div id="hint">RIPPLES · click or drag to create ripples</div>
   <div id="ui">
+    <button id="btn-music">Music: Soft</button>
     <button id="btn-clear">Clear</button>
-    <button id="btn-save">Save Image</button>
+    <button id="btn-save">Save</button>
   </div>
   <script>
-    const PENTATONIC = [261.63,329.63,392.00,523.25,659.25,784.00,1046.50,1318.51];
-    let audioCtx=null, masterGain=null, lastToneTime=0;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-        masterGain=audioCtx.createGain();
-        masterGain.gain.value=0.5;
-        masterGain.connect(audioCtx.destination);
-      }
-      if (audioCtx.state==='suspended') audioCtx.resume();
-    }
-
-    function playTone(x, y) {
-      if (!audioCtx) return;
-      const now=audioCtx.currentTime;
-      if (now-lastToneTime<0.2) return;
-      lastToneTime=now;
-      const idx=Math.floor((x/window.innerWidth)*PENTATONIC.length);
-      const freq=PENTATONIC[Math.min(idx,PENTATONIC.length-1)];
-      const osc=audioCtx.createOscillator();
-      const gain=audioCtx.createGain();
-      osc.type='sine';
-      osc.frequency.value=freq;
-      gain.gain.setValueAtTime(0,now);
-      gain.gain.linearRampToValueAtTime(0.4,now+0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001,now+2.5);
-      osc.connect(gain); gain.connect(masterGain);
-      osc.start(now); osc.stop(now+2.5);
-    }
-
+    const NOTE_SETS={mid:[261.63,293.66,329.63,392,440,523.25,587.33,659.25,784,880],high:[523.25,659.25,784,880,1046.5,1318.51,1568,1760],low:[65.41,82.41,98,130.81,164.81,196,261.63,329.63]};
+    const MODES=[{name:'Soft',wave:'triangle',notes:'mid',decay:3.0,vol:0.30},{name:'Bells',wave:'sine',notes:'high',decay:5.5,vol:0.24},{name:'Bass',wave:'sine',notes:'low',decay:8.0,vol:0.42},{name:'Chimes',wave:'sine',notes:'mid',decay:4.0,vol:0.20,chord:true},{name:'Silent',wave:null}];
+    let modeIdx=0,audioCtx=null,masterGain=null,lastToneTime=0;
+    function initAudio(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.55;masterGain.connect(audioCtx.destination);}if(audioCtx.state==='suspended')audioCtx.resume();}
+    function playTone(x,y){const mode=MODES[modeIdx];if(!audioCtx||!mode.wave)return;const now=audioCtx.currentTime;if(now-lastToneTime<0.2)return;lastToneTime=now;const notes=NOTE_SETS[mode.notes];const idx=Math.floor((x/window.innerWidth)*notes.length);const freqs=mode.chord?[notes[idx%notes.length],notes[(idx+2)%notes.length],notes[(idx+4)%notes.length]]:[notes[Math.min(idx,notes.length-1)]];freqs.forEach((freq,i)=>{const osc=audioCtx.createOscillator(),g=audioCtx.createGain();osc.type=mode.wave;osc.frequency.value=freq;const v=mode.vol/(1+i*0.5);g.gain.setValueAtTime(0,now+i*0.06);g.gain.linearRampToValueAtTime(v,now+i*0.06+0.06);g.gain.exponentialRampToValueAtTime(0.001,now+mode.decay);osc.connect(g);g.connect(masterGain);osc.start(now+i*0.06);osc.stop(now+mode.decay);});}
     const COLORS=['#00f5d4','#00bbf9','#9b5de5','#f15bb5','#fee440','#48cae4','#74c69d','#ffa94d'];
-
-    new p5(function(p) {
+    new p5(function(p){
       let ripples=[];
-
-      function addRipple(x,y) {
-        ripples.push({x,y,r:4,speed:p.random(0.6,1.2),alpha:210,fade:p.random(0.9,1.6),color:p.random(COLORS)});
-        initAudio(); playTone(x,y);
-      }
-
-      p.setup=function() {
-        const cnv=p.createCanvas(p.windowWidth,p.windowHeight); cnv.style('display','block');
-        p.frameRate(60);
-      };
-
-      p.draw=function() {
-        p.background(10,10,15,18);
-        p.noFill();
-        for (let i=ripples.length-1;i>=0;i--) {
-          const rp=ripples[i];
-          rp.r+=rp.speed;
-          rp.alpha-=rp.fade;
-          if (rp.alpha<=0) { ripples.splice(i,1); continue; }
-          const c=p.color(rp.color); c.setAlpha(rp.alpha);
-          p.stroke(c); p.strokeWeight(1.5);
-          p.ellipse(rp.x,rp.y,rp.r*2,rp.r*2);
-          if (rp.r>18) {
-            const c2=p.color(rp.color); c2.setAlpha(rp.alpha*0.35);
-            p.stroke(c2); p.strokeWeight(0.7);
-            p.ellipse(rp.x,rp.y,(rp.r-15)*2,(rp.r-15)*2);
-          }
+      function addRipple(x,y){ripples.push({x,y,r:4,speed:p.random(0.25,0.55),alpha:200,fade:p.random(0.3,0.65),color:p.random(COLORS)});initAudio();playTone(x,y);}
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');p.frameRate(60);};
+      p.draw=function(){
+        p.background(10,10,15,12);p.noFill();
+        for(let i=ripples.length-1;i>=0;i--){
+          const rp=ripples[i];rp.r+=rp.speed;rp.alpha-=rp.fade;
+          if(rp.alpha<=0){ripples.splice(i,1);continue;}
+          const c=p.color(rp.color);c.setAlpha(rp.alpha);p.stroke(c);p.strokeWeight(1.4);p.ellipse(rp.x,rp.y,rp.r*2,rp.r*2);
+          if(rp.r>20){const c2=p.color(rp.color);c2.setAlpha(rp.alpha*0.3);p.stroke(c2);p.strokeWeight(0.7);p.ellipse(rp.x,rp.y,(rp.r-18)*2,(rp.r-18)*2);}
         }
       };
-
-      p.mousePressed=function() { if (p.mouseY<p.height-80) addRipple(p.mouseX,p.mouseY); };
-      p.mouseDragged=function() { if (p.mouseY<p.height-80 && p.frameCount%5===0) addRipple(p.mouseX,p.mouseY); };
-      p.windowResized=function() { p.resizeCanvas(p.windowWidth,p.windowHeight); };
-
-      document.getElementById('btn-clear').addEventListener('click',()=>{ ripples=[]; });
-      document.getElementById('btn-save').addEventListener('click',()=>{ p.saveCanvas('ripples','png'); });
+      p.mousePressed=function(){if(p.mouseY<p.height-80)addRipple(p.mouseX,p.mouseY);};
+      p.mouseDragged=function(){if(p.mouseY<p.height-80&&p.frameCount%6===0)addRipple(p.mouseX,p.mouseY);};
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);};
+      document.getElementById('btn-music').addEventListener('click',()=>{modeIdx=(modeIdx+1)%MODES.length;document.getElementById('btn-music').textContent='Music: '+MODES[modeIdx].name;});
+      document.getElementById('btn-clear').addEventListener('click',()=>{ripples=[];});
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('ripples','png');});
     });
   </script>
 </body>

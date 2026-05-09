@@ -6,83 +6,36 @@
   <title>Constellation</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; overflow: hidden; }
-    canvas { display: block; }
-    a#back, button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; cursor: pointer; backdrop-filter: blur(8px); transition: background 0.2s; font-family: system-ui, sans-serif; text-decoration: none; }
-    a#back:hover, button:hover { background: rgba(255,255,255,0.18); }
-    #back { position: fixed; top: 20px; left: 24px; z-index: 10; }
-    #ui { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
-    #hint { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 12px; font-family: system-ui, sans-serif; letter-spacing: 0.05em; pointer-events: none; }
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
   </style>
 </head>
 <body>
   <a id="back" href="index.html">← Gallery</a>
-  <div id="hint">CONSTELLATION &nbsp;·&nbsp; stars drift and connect &nbsp;·&nbsp; click to add stars</div>
-  <div id="ui">
-    <button id="btn-save">Save Image</button>
-  </div>
+  <div id="hint">CONSTELLATION · stars drift and connect · click to add stars</div>
+  <div id="ui"><button id="btn-save">Save</button></div>
   <script>
-    new p5(function(p) {
-      const COUNT=110, MAX_DIST=160;
+    new p5(function(p){
+      const COUNT=100,MAX_DIST=155;
       let stars=[];
-
-      function makeStar(x,y) {
-        return {
-          x: x!==undefined ? x : p.random(p.width),
-          y: y!==undefined ? y : p.random(p.height),
-          vx: p.random(-0.12,0.12),
-          vy: p.random(-0.12,0.12),
-          size: p.random(1,2.8),
-          pulse: p.random(p.TWO_PI),
-          hue: p.random(180,280)
-        };
-      }
-
-      p.setup=function() {
-        const cnv=p.createCanvas(p.windowWidth,p.windowHeight); cnv.style('display','block');
-        p.colorMode(p.HSB,360,100,100,255);
-        p.frameRate(60);
-        stars=Array.from({length:COUNT},()=>makeStar());
-      };
-
-      p.draw=function() {
+      function makeStar(x,y){return{x:x!==undefined?x:p.random(p.width),y:y!==undefined?y:p.random(p.height),vx:p.random(-0.05,0.05),vy:p.random(-0.05,0.05),size:p.random(1,2.6),pulse:p.random(p.TWO_PI),hue:p.random(180,280)};}
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');p.colorMode(p.HSB,360,100,100,255);p.frameRate(60);stars=Array.from({length:COUNT},()=>makeStar());};
+      p.draw=function(){
         p.background(240,30,5);
-
-        for (let i=0;i<stars.length;i++) {
-          const a=stars[i];
-          a.x+=a.vx; a.y+=a.vy; a.pulse+=0.012;
-          if (a.x<0) a.x=p.width; if (a.x>p.width) a.x=0;
-          if (a.y<0) a.y=p.height; if (a.y>p.height) a.y=0;
-
-          for (let j=i+1;j<stars.length;j++) {
-            const b=stars[j];
-            const d=p.dist(a.x,a.y,b.x,b.y);
-            if (d<MAX_DIST) {
-              const alpha=p.map(d,0,MAX_DIST,90,0);
-              p.stroke(220,40,80,alpha);
-              p.strokeWeight(0.6);
-              p.line(a.x,a.y,b.x,b.y);
-            }
-          }
-
-          const s=a.size+Math.sin(a.pulse)*0.6;
-          p.noStroke();
-          p.fill(a.hue,20,100,230);
-          p.ellipse(a.x,a.y,s,s);
-          p.fill(a.hue,10,100,80);
-          p.ellipse(a.x,a.y,s*2.5,s*2.5);
+        for(let i=0;i<stars.length;i++){
+          const a=stars[i];a.x+=a.vx;a.y+=a.vy;a.pulse+=0.008;
+          if(a.x<0)a.x=p.width;if(a.x>p.width)a.x=0;if(a.y<0)a.y=p.height;if(a.y>p.height)a.y=0;
+          for(let j=i+1;j<stars.length;j++){const b=stars[j];const d=p.dist(a.x,a.y,b.x,b.y);if(d<MAX_DIST){const al=p.map(d,0,MAX_DIST,80,0);p.stroke(220,35,80,al);p.strokeWeight(0.5);p.line(a.x,a.y,b.x,b.y);}}
+          const s=a.size+Math.sin(a.pulse)*0.5;p.noStroke();p.fill(a.hue,20,100,220);p.ellipse(a.x,a.y,s,s);p.fill(a.hue,10,100,60);p.ellipse(a.x,a.y,s*2.8,s*2.8);
         }
       };
-
-      p.mousePressed=function() {
-        if (p.mouseY>p.height-80) return;
-        for (let i=0;i<6;i++) stars.push(makeStar(p.mouseX+p.random(-30,30),p.mouseY+p.random(-30,30)));
-        if (stars.length>COUNT*2) stars.splice(0,6);
-      };
-
-      p.windowResized=function() { p.resizeCanvas(p.windowWidth,p.windowHeight); };
-      document.getElementById('btn-save').addEventListener('click',()=>{ p.saveCanvas('constellation','png'); });
+      p.mousePressed=function(){if(p.mouseY>p.height-80)return;for(let i=0;i<6;i++)stars.push(makeStar(p.mouseX+p.random(-25,25),p.mouseY+p.random(-25,25)));if(stars.length>COUNT*2)stars.splice(0,6);};
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);};
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('constellation','png');});
     });
   </script>
 </body>

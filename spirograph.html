@@ -6,81 +6,41 @@
   <title>Spirograph</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; overflow: hidden; }
-    canvas { display: block; }
-    a#back, button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; cursor: pointer; backdrop-filter: blur(8px); transition: background 0.2s; font-family: system-ui, sans-serif; text-decoration: none; }
-    a#back:hover, button:hover { background: rgba(255,255,255,0.18); }
-    #back { position: fixed; top: 20px; left: 24px; z-index: 10; }
-    #ui { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
-    #hint { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 12px; font-family: system-ui, sans-serif; letter-spacing: 0.05em; pointer-events: none; }
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
   </style>
 </head>
 <body>
   <a id="back" href="index.html">← Gallery</a>
-  <div id="hint">SPIROGRAPH &nbsp;·&nbsp; watch it bloom &nbsp;·&nbsp; click New Pattern anytime</div>
+  <div id="hint">SPIROGRAPH · watch it slowly bloom</div>
   <div id="ui">
     <button id="btn-new">New Pattern</button>
-    <button id="btn-palette">Change Palette</button>
-    <button id="btn-save">Save Image</button>
+    <button id="btn-palette">Palette</button>
+    <button id="btn-save">Save</button>
   </div>
   <script>
-    const PALETTES = [
-      ['#00f5d4','#9b5de5','#f15bb5','#fee440','#00bbf9'],
-      ['#ff6b6b','#ffa94d','#ffe066','#ff6b6b','#c0392b'],
-      ['#48cae4','#0096c7','#023e8a','#ade8f4','#90e0ef'],
-      ['#74c69d','#40916c','#2d6a4f','#b7e4c7','#52b788'],
-      ['#ff99c8','#a9def9','#e4c1f9','#fcf6bd','#d0f4de'],
-    ];
-    let palIdx = 0;
-    new p5(function(p) {
-      let R, r, d, speed, t, maxT, col1, col2, cx, cy, pg;
-
-      function newPattern() {
+    const PALETTES=[['#00f5d4','#9b5de5','#f15bb5','#fee440','#00bbf9'],['#ff6b6b','#ffa94d','#ffe066','#c0392b'],['#48cae4','#0096c7','#023e8a','#ade8f4'],['#74c69d','#40916c','#2d6a4f','#b7e4c7'],['#ff99c8','#a9def9','#e4c1f9','#fcf6bd']];
+    let palIdx=0;
+    new p5(function(p){
+      let R,r,d,speed,t,maxT,col1,col2,cx,cy,pg;
+      function newPattern(){
         const pal=PALETTES[palIdx];
-        R=p.random(60,Math.min(p.width,p.height)*0.38);
-        r=p.random(R*0.1,R*0.65);
-        d=p.random(r*0.3,r*1.4);
-        speed=p.random(0.002,0.006);
-        t=0;
-        const lcm=R/Math.max(1,p.gcd ? p.gcd(Math.round(R),Math.round(r)) : 1);
-        maxT=p.TWO_PI*Math.min(lcm,80);
-        col1=p.color(p.random(pal)); col2=p.color(p.random(pal));
-        cx=p.width/2; cy=p.height/2;
-        pg.background(10,10,15);
+        R=p.random(60,Math.min(p.width,p.height)*0.38);r=p.random(R*0.1,R*0.65);d=p.random(r*0.3,r*1.4);
+        speed=p.random(0.0008,0.0022);t=0;
+        maxT=p.TWO_PI*Math.min(80,R/Math.max(1,Math.round(r)));
+        col1=p.color(p.random(pal));col2=p.color(p.random(pal));
+        cx=p.width/2;cy=p.height/2;pg.background(10,10,15);
       }
-
-      p.setup = function() {
-        const cnv=p.createCanvas(p.windowWidth,p.windowHeight); cnv.style('display','block');
-        pg=p.createGraphics(p.width,p.height);
-        pg.background(10,10,15);
-        pg.colorMode(p.RGB,255,255,255,255);
-        p.colorMode(p.RGB,255,255,255,255);
-        p.frameRate(60); newPattern();
-      };
-
-      p.draw = function() {
-        if (t < maxT) {
-          const steps=4;
-          for (let s=0;s<steps;s++) {
-            const tt=t+s*speed;
-            const x=(R-r)*Math.cos(tt)+d*Math.cos((R-r)/r*tt);
-            const y=(R-r)*Math.sin(tt)-d*Math.sin((R-r)/r*tt);
-            const c=p.lerpColor(col1,col2,tt/maxT); c.setAlpha(175);
-            pg.stroke(c); pg.strokeWeight(1.2); pg.point(cx+x,cy+y);
-          }
-          t+=speed*steps;
-        } else {
-          if (p.frameCount%150===0) newPattern();
-        }
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');pg=p.createGraphics(p.width,p.height);pg.background(10,10,15);pg.colorMode(p.RGB,255,255,255,255);p.colorMode(p.RGB,255,255,255,255);p.frameRate(60);newPattern();};
+      p.draw=function(){
+        if(t<maxT){const steps=3;for(let s=0;s<steps;s++){const tt=t+s*speed;const x=(R-r)*Math.cos(tt)+d*Math.cos((R-r)/r*tt);const y=(R-r)*Math.sin(tt)-d*Math.sin((R-r)/r*tt);const c=p.lerpColor(col1,col2,tt/maxT);c.setAlpha(170);pg.stroke(c);pg.strokeWeight(1.2);pg.point(cx+x,cy+y);}t+=speed*steps;}else{if(p.frameCount%180===0)newPattern();}
         p.image(pg,0,0);
       };
-
-      p.windowResized = function() {
-        p.resizeCanvas(p.windowWidth,p.windowHeight);
-        pg=p.createGraphics(p.width,p.height); pg.background(10,10,15); pg.colorMode(p.RGB,255,255,255,255); newPattern();
-      };
-
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);pg=p.createGraphics(p.width,p.height);pg.background(10,10,15);pg.colorMode(p.RGB,255,255,255,255);newPattern();};
       document.getElementById('btn-new').addEventListener('click',newPattern);
       document.getElementById('btn-palette').addEventListener('click',()=>{palIdx=(palIdx+1)%PALETTES.length;newPattern();});
       document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('spirograph','png');});
