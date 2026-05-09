@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tennis Serve</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.28);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
+    #label{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.20);font-size:11px;font-family:system-ui,sans-serif;letter-spacing:0.12em;pointer-events:none}
+  </style>
+</head>
+<body>
+  <a id="back" href="index.html">← Gallery</a>
+  <div id="hint">TENNIS SERVE · looping animation</div>
+  <div id="label" id="phase-label"></div>
+  <div id="ui">
+    <button id="btn-speed">Speed: Normal</button>
+    <button id="btn-save">Save Frame</button>
+  </div>
+  <script>
+    // ─ Keyframes — joints relative to hips=[0,0], +x=forward(right), -y=up
+    const KF = [
+      { ph:0.00, // Ready
+        hd:[2,-158], lS:[-34,-120], lE:[-40,-86], lH:[-36,-58],
+        rS:[36,-120], rE:[52,-84],  rH:[64,-60],
+        lK:[-20,62], lF:[-24,130], rK:[22,62], rF:[26,130],
+        ball:[-36,-58], bv:false, ra:28 },
+      { ph:0.20, // Ball toss begins
+        hd:[4,-156], lS:[-32,-118], lE:[-10,-166], lH:[4,-216],
+        rS:[38,-118], rE:[80,-80],  rH:[96,-58],
+        lK:[-18,58], lF:[-22,128], rK:[20,58], rF:[24,128],
+        ball:[4,-232], bv:true, ra:-32 },
+      { ph:0.36, // Trophy position
+        hd:[8,-154], lS:[-30,-116], lE:[-4,-180], lH:[8,-228],
+        rS:[40,-116], rE:[86,-72],  rH:[102,-52],
+        lK:[-16,54], lF:[-20,126], rK:[20,54], rF:[24,126],
+        ball:[8,-246], bv:true, ra:-84 },
+      { ph:0.52, // Power — loading
+        hd:[12,-150], lS:[-28,-114], lE:[-22,-96], lH:[-28,-70],
+        rS:[42,-116], rE:[60,-150], rH:[44,-195],
+        lK:[-17,52], lF:[-20,122], rK:[20,50], rF:[26,114],
+        ball:[38,-235], bv:true, ra:55 },
+      { ph:0.60, // Contact
+        hd:[14,-148], lS:[-26,-112], lE:[-34,-84], lH:[-40,-60],
+        rS:[42,-114], rE:[34,-164], rH:[22,-210],
+        lK:[-18,50], lF:[-20,118], rK:[20,48], rF:[26,110],
+        ball:[55,-226], bv:true, ra:12 },
+      { ph:0.74, // Follow‐through
+        hd:[8,-152], lS:[-30,-116], lE:[-42,-82], lH:[-50,-58],
+        rS:[38,-116], rE:[-18,-128], rH:[-44,-96],
+        lK:[-20,56], lF:[-24,126], rK:[22,56], rF:[26,126],
+        ball:[210,-270], bv:true, ra:205 },
+      { ph:0.88, // Recovery
+        hd:[2,-158], lS:[-34,-120], lE:[-40,-86], lH:[-36,-58],
+        rS:[36,-120], rE:[52,-84],  rH:[64,-60],
+        lK:[-20,62], lF:[-24,130], rK:[22,62], rF:[26,130],
+        ball:[-36,-58], bv:false, ra:28 },
+      { ph:1.00, // Loop
+        hd:[2,-158], lS:[-34,-120], lE:[-40,-86], lH:[-36,-58],
+        rS:[36,-120], rE:[52,-84],  rH:[64,-60],
+        lK:[-20,62], lF:[-24,130], rK:[22,62], rF:[26,130],
+        ball:[-36,-58], bv:false, ra:28 },
+    ];
+    const PHASES=['READY','TOSS','TROPHY','LOADING','CONTACT','FOLLOW-THROUGH','RECOVERY','READY'];
+
+    function sm(t){return t*t*(3-2*t);}
+    function lp(a,b,t){return a+(b-a)*t;}
+    function lp2(a,b,t){return[lp(a[0],b[0],t),lp(a[1],b[1],t)];}
+    function lpa(a,b,t){let d=((b-a+540)%360)-180;return a+d*t;}
+
+    function getState(ph){
+      ph=((ph%1)+1)%1;
+      let i=0;
+      for(let k=0;k<KF.length-1;k++){if(ph>=KF[k].ph&&ph<KF[k+1].ph){i=k;break;}}
+      const f0=KF[i],f1=KF[i+1];
+      const t=sm((ph-f0.ph)/(f1.ph-f0.ph));
+      const keys=['hd','lS','lE','lH','rS','rE','rH','lK','lF','rK','rF','ball'];
+      const s={};
+      keys.forEach(k=>s[k]=lp2(f0[k],f1[k],t));
+      s.ra=lpa(f0.ra,f1.ra,t);
+      s.bv=ph>0.15&&ph<0.86;
+      s.phase=PHASES[i];
+      return s;
+    }
+
+    new p5(function(p){
+      let speedIdx=1;
+      const SPEEDS=[0.38,1.0,2.2];
+      const SLABELS=['Speed: Slow','Speed: Normal','Speed: Fast'];
+      let SC,CX,CY;
+
+      function resize(){
+        SC=Math.min(p.width,p.height)/680;
+        CX=p.width*0.42;
+        CY=p.height*0.56;
+      }
+
+      p.setup=function(){
+        const cnv=p.createCanvas(p.windowWidth,p.windowHeight);
+        cnv.style('display','block'); p.frameRate(60); resize();
+      };
+
+      p.draw=function(){
+        const ph=(p.millis()/1000*SPEEDS[speedIdx]/3.2)%1;
+        const st=getState(ph);
+        document.getElementById('label').textContent=st.phase;
+        drawBg();
+        drawCourt();
+        drawShadow();
+        drawPlayer(st);
+      };
+
+      function drawBg(){
+        // Sky gradient
+        for(let y=0;y<p.height*0.64;y+=3){
+          const t=y/(p.height*0.64);
+          p.stroke(p.lerpColor(p.color(145,210,240),p.color(70,130,188),t));
+          p.strokeWeight(3); p.line(0,y,p.width,y);
+        }
+        // Court surface
+        p.noStroke(); p.fill(32,82,148);
+        p.rect(0,p.height*0.64,p.width,p.height*0.36);
+        // Subtle texture bands
+        p.fill(28,74,138);
+        for(let y=p.height*0.64;y<p.height;y+=18){p.rect(0,y,p.width,9);}
+      }
+
+      function drawCourt(){
+        const gY=CY+130*SC;
+        p.stroke(255); p.strokeWeight(2);
+        // Baseline
+        p.line(p.width*0.08,gY,p.width*0.92,gY);
+        // Service line
+        p.line(p.width*0.22,gY-gY*0.07,p.width*0.78,gY-gY*0.07);
+        // Centre service line
+        p.line(p.width*0.5,gY-gY*0.07,p.width*0.5,gY);
+        // Side lines
+        p.line(p.width*0.22,gY-gY*0.07,p.width*0.22,gY);
+        p.line(p.width*0.78,gY-gY*0.07,p.width*0.78,gY);
+        // Net
+        const netX=p.width*0.1,netTop=gY-gY*0.075,netBot=gY;
+        p.stroke(220); p.strokeWeight(2);
+        p.line(netX,netTop,netX,netBot);
+        p.stroke(220,220,220,100); p.strokeWeight(1);
+        for(let ny=netTop;ny<netBot;ny+=6){p.line(netX-10,ny,netX+10,ny);}
+        // Crowd suggestion (dots)
+        p.noStroke();
+        for(let i=0;i<60;i++){
+          const cx2=p.width*0.05+Math.random()*p.width*0.9;
+          const cy2=p.height*0.58+Math.random()*p.height*0.04;
+          const c=p.color(100+Math.random()*80,120+Math.random()*60,180+Math.random()*50,80);
+          p.fill(c); p.ellipse(cx2,cy2,5,5);
+        }
+      }
+
+      function drawShadow(){
+        const gY=CY+130*SC;
+        p.noStroke(); p.fill(0,0,0,40);
+        p.ellipse(CX+8*SC,gY+5,88*SC,14*SC);
+      }
+
+      const pt=j=>[CX+j[0]*SC,CY+j[1]*SC];
+
+      function seg(a,b,w,col){
+        p.stroke(col); p.strokeWeight(w); p.strokeCap(p.ROUND);
+        p.line(a[0],a[1],b[0],b[1]);
+      }
+
+      function drawPlayer(st){
+        const SKIN=p.color(238,188,138);
+        const SHIRT=p.color(248,248,252); // white shirt
+        const SHORT=p.color(220,228,245); // light blue shorts
+        const SHOE=p.color(245,245,248);
+        const SOLE=p.color(50,50,60);
+        const ACCENT=p.color(65,105,220); // blue accent
+
+        const hips=[CX,CY];
+        const lHip=pt([-16,6]),rHip=pt([16,6]);
+
+        // ─ Back leg (left)
+        seg(lHip,pt(st.lK),10*SC,SHORT);
+        seg(pt(st.lK),pt(st.lF),9*SC,SKIN);
+        // shoe
+        p.noStroke(); p.fill(SOLE);
+        p.ellipse(pt(st.lF)[0]-4*SC,pt(st.lF)[1]+4,20*SC,8*SC);
+        p.fill(SHOE);
+        p.ellipse(pt(st.lF)[0]-4*SC,pt(st.lF)[1]+2,18*SC,6*SC);
+
+        // ─ Torso
+        const neck=pt(st.hd);
+        seg(hips,neck,14*SC,SHIRT);
+        // Shirt accent stripe
+        seg([hips[0]-4*SC,hips[1]-30*SC],[neck[0]-4*SC,neck[1]+18*SC],3*SC,ACCENT);
+
+        // ─ Back arm (left)
+        seg(pt(st.lS),pt(st.lE),7*SC,SHIRT);
+        seg(pt(st.lE),pt(st.lH),6.5*SC,SKIN);
+
+        // ─ Front leg (right)
+        seg(rHip,pt(st.rK),11*SC,SHORT);
+        seg(pt(st.rK),pt(st.rF),10*SC,SKIN);
+        p.noStroke(); p.fill(SOLE);
+        p.ellipse(pt(st.rF)[0]+4*SC,pt(st.rF)[1]+4,22*SC,9*SC);
+        p.fill(SHOE);
+        p.ellipse(pt(st.rF)[0]+4*SC,pt(st.rF)[1]+2,20*SC,7*SC);
+
+        // ─ Racket arm (right) — drawn before head so head is on top
+        seg(pt(st.rS),pt(st.rE),8*SC,SHIRT);
+        seg(pt(st.rE),pt(st.rH),7*SC,SKIN);
+        // Wristband
+        p.noStroke(); p.fill(255,255,255);
+        p.ellipse(pt(st.rH)[0],pt(st.rH)[1],9*SC,9*SC);
+
+        // ─ Racket
+        drawRacket(pt(st.rH)[0],pt(st.rH)[1],st.ra);
+
+        // ─ Head
+        p.noStroke(); p.fill(SKIN);
+        p.ellipse(pt(st.hd)[0],pt(st.hd)[1],26*SC,28*SC);
+        // Hair
+        p.fill(55,38,18);
+        p.arc(pt(st.hd)[0],pt(st.hd)[1],27*SC,28*SC,p.PI,p.TWO_PI);
+        // Eye
+        p.fill(30,20,10);
+        p.ellipse(pt(st.hd)[0]+8*SC,pt(st.hd)[1]-1*SC,3*SC,3*SC);
+
+        // ─ Tennis ball
+        if(st.bv){
+          const bx=pt(st.ball)[0],by=pt(st.ball)[1];
+          // Glow
+          p.noStroke(); p.fill(200,230,0,40); p.ellipse(bx,by,22*SC,22*SC);
+          // Ball
+          p.fill(198,228,0); p.ellipse(bx,by,14*SC,14*SC);
+          // Seam curve
+          p.noFill(); p.stroke(255,255,255,120); p.strokeWeight(1.2);
+          p.arc(bx,by,10*SC,10*SC,p.QUARTER_PI,p.PI+p.QUARTER_PI);
+          // Highlight
+          p.noStroke(); p.fill(235,255,80,160);
+          p.ellipse(bx-2*SC,by-3*SC,4*SC,4*SC);
+        }
+      }
+
+      function drawRacket(hx,hy,angle){
+        p.push();
+        p.translate(hx,hy);
+        p.rotate(p.radians(angle));
+
+        const hLen=46*SC,headH=42*SC,headW=28*SC;
+        const headCY=-(hLen+headH*0.5+3*SC);
+        const hw=headW/2,hh=headH/2;
+
+        // Grip wrapping
+        p.stroke(180,140,90); p.strokeWeight(5.5*SC); p.strokeCap(p.ROUND);
+        p.line(0,0,0,hLen*0.6);
+        p.stroke(100,70,40); p.strokeWeight(5*SC);
+        p.line(0,hLen*0.6,0,hLen);
+
+        // Throat
+        p.stroke(60,60,60); p.strokeWeight(2.5*SC);
+        p.line(-5*SC,-(hLen),5*SC,-(hLen));
+        p.line(-5*SC,-(hLen),-2*SC,headCY+hh);
+        p.line( 5*SC,-(hLen), 2*SC,headCY+hh);
+
+        // Frame (draw twice for thickness effect)
+        p.noFill(); p.stroke(25,25,25); p.strokeWeight(4*SC);
+        p.ellipse(0,headCY,headW,headH);
+        p.stroke(80,80,90); p.strokeWeight(2*SC);
+        p.ellipse(0,headCY,headW-3*SC,headH-3*SC);
+
+        // Strings horizontal
+        p.stroke(220,220,220,150); p.strokeWeight(0.9);
+        for(let dy=-hh+5;dy<=hh-5;dy+=5.5*SC){
+          const xw=hw*Math.sqrt(Math.max(0,1-(dy/hh)**2))*0.9;
+          p.line(-xw,headCY+dy,xw,headCY+dy);
+        }
+        // Strings vertical
+        for(let dx=-hw+5;dx<=hw-5;dx+=5.5*SC){
+          const yw=hh*Math.sqrt(Math.max(0,1-(dx/hw)**2))*0.9;
+          p.line(dx,headCY-yw,dx,headCY+yw);
+        }
+        p.pop();
+      }
+
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);resize();};
+
+      document.getElementById('btn-speed').addEventListener('click',()=>{
+        speedIdx=(speedIdx+1)%SPEEDS.length;
+        document.getElementById('btn-speed').textContent=SLABELS[speedIdx];
+      });
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('tennis-serve','png');});
+    });
+  </script>
+</body>
+</html>

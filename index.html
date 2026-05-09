@@ -7,15 +7,15 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{background:#0a0a0f;color:#fff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:60px 24px}
-    header{text-align:center;margin-bottom:64px}
+    header{text-align:center;margin-bottom:60px}
     header h1{font-size:clamp(2rem,6vw,4rem);font-weight:700;letter-spacing:-0.03em;background:linear-gradient(135deg,#00f5d4,#9b5de5,#f15bb5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     header p{margin-top:12px;color:rgba(255,255,255,0.4);font-size:15px;letter-spacing:0.04em}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;max-width:1200px;margin:0 auto}
-    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;text-decoration:none;color:inherit;transition:transform 0.25s,border-color 0.25s,background 0.25s;display:flex;flex-direction:column}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;transition:transform 0.25s,border-color 0.25s,background 0.25s;display:flex;flex-direction:column}
     .card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.07)}
-    .card-preview{height:130px;display:flex;align-items:center;justify-content:center;font-size:38px}
-    .card-body{padding:18px}
-    .card-body h2{font-size:16px;font-weight:600;margin-bottom:7px}
+    .card-preview{height:120px;display:flex;align-items:center;justify-content:center;font-size:36px}
+    .card-body{padding:16px}
+    .card-body h2{font-size:15px;font-weight:600;margin-bottom:6px}
     .card-body p{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6}
     .tag{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:0.06em;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);text-transform:uppercase}
     .c1{background:linear-gradient(135deg,#0a0a0f,#1a0a2e,#0d1b2a)}.c2{background:linear-gradient(135deg,#0a0a0f,#1a0a0a,#2a1500)}
@@ -23,6 +23,7 @@
     .c5{background:linear-gradient(135deg,#0a0a0f,#0a0a1a,#0a0020)}.c6{background:linear-gradient(135deg,#000a05,#001a0f,#002a18)}
     .c7{background:linear-gradient(135deg,#0a0a0f,#180a22,#200030)}.c8{background:linear-gradient(135deg,#180500,#200a05,#150010)}
     .c9{background:linear-gradient(135deg,#080810,#0a0a18,#0e0e14)}.c10{background:linear-gradient(135deg,#100400,#1e0800,#100200)}
+    .c11{background:linear-gradient(135deg,#041408,#082810,#041408)}
   </style>
 </head>
 <body>
@@ -31,16 +32,17 @@
     <p>Code that makes visuals · click a sketch to explore</p>
   </header>
   <div class="grid">
-    <a class="card" href="flow-field.html"><div class="card-preview c1">🌊</div><div class="card-body"><h2>Flow Field</h2><p>Particles drift slowly through noise currents. Drag to paint. 5 music modes.</p><span class="tag">Particles · Audio</span></div></a>
-    <a class="card" href="spirograph.html"><div class="card-preview c2">✨</div><div class="card-body"><h2>Spirograph</h2><p>Rotating circles slowly trace intricate geometric curves that bloom into patterns.</p><span class="tag">Geometry</span></div></a>
-    <a class="card" href="fractal-tree.html"><div class="card-preview c3">🌿</div><div class="card-body"><h2>Fractal Tree</h2><p>A tree grows slowly from seed, branch by branch. Then sways gently in a breeze.</p><span class="tag">Fractal · Growth</span></div></a>
+    <a class="card" href="flow-field.html"><div class="card-preview c1">🌊</div><div class="card-body"><h2>Flow Field</h2><p>Particles drift through noise currents. Drag to paint. 5 music modes.</p><span class="tag">Particles · Audio</span></div></a>
+    <a class="card" href="spirograph.html"><div class="card-preview c2">✨</div><div class="card-body"><h2>Spirograph</h2><p>Rotating circles slowly trace intricate curves that bloom into patterns.</p><span class="tag">Geometry</span></div></a>
+    <a class="card" href="fractal-tree.html"><div class="card-preview c3">🌿</div><div class="card-body"><h2>Fractal Tree</h2><p>A tree grows slowly from seed, branch by branch, then sways in a breeze.</p><span class="tag">Fractal · Growth</span></div></a>
     <a class="card" href="ripples.html"><div class="card-preview c4">💧</div><div class="card-body"><h2>Ripples</h2><p>Click to send soft ripples across a still dark pond. 5 music modes.</p><span class="tag">Water · Audio</span></div></a>
     <a class="card" href="constellation.html"><div class="card-preview c5">✦</div><div class="card-body"><h2>Constellation</h2><p>Stars drift very slowly, drawing faint lines between neighbours.</p><span class="tag">Stars</span></div></a>
-    <a class="card" href="aurora.html"><div class="card-preview c6">🌌</div><div class="card-body"><h2>Aurora</h2><p>Curtains of northern lights slowly drift and shimmer across a starry sky.</p><span class="tag">Northern Lights</span></div></a>
-    <a class="card" href="mandala.html"><div class="card-preview c7">🔮</div><div class="card-body"><h2>Mandala</h2><p>Concentric geometric rings breathe and rotate slowly in a meditative pattern.</p><span class="tag">Geometric</span></div></a>
+    <a class="card" href="aurora.html"><div class="card-preview c6">🌌</div><div class="card-body"><h2>Aurora</h2><p>Curtains of northern lights drift and shimmer across a starry sky.</p><span class="tag">Northern Lights</span></div></a>
+    <a class="card" href="mandala.html"><div class="card-preview c7">🔮</div><div class="card-body"><h2>Mandala</h2><p>Geometric rings breathe and rotate slowly in a meditative pattern.</p><span class="tag">Geometric</span></div></a>
     <a class="card" href="lava-lamp.html"><div class="card-preview c8">🧧</div><div class="card-body"><h2>Lava Lamp</h2><p>Warm glowing orbs rise slowly and drift, blending in soft light.</p><span class="tag">Blobs · Glow</span></div></a>
-    <a class="card" href="smoke.html"><div class="card-preview c9">🌫️</div><div class="card-body"><h2>Smoke</h2><p>Wispy tendrils rise slowly from the darkness and dissolve into nothing.</p><span class="tag">Ethereal</span></div></a>
+    <a class="card" href="smoke.html"><div class="card-preview c9">🌫️</div><div class="card-body"><h2>Smoke</h2><p>Wispy tendrils rise slowly from the darkness and dissolve.</p><span class="tag">Ethereal</span></div></a>
     <a class="card" href="fireplace.html"><div class="card-preview c10">🔥</div><div class="card-body"><h2>Fireplace</h2><p>A warm crackling fire with glowing embers, sparks, and authentic fire sounds.</p><span class="tag">Fire · Audio</span></div></a>
+    <a class="card" href="tennis.html"><div class="card-preview c11">🎾</div><div class="card-body"><h2>Tennis Serve</h2><p>A smooth stick-figure serve animation — toss, trophy, contact, follow-through on loop.</p><span class="tag">Animation · Sports</span></div></a>
   </div>
 </body>
 </html>
