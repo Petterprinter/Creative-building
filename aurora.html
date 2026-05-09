@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurora</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
+  </style>
+</head>
+<body>
+  <a id="back" href="index.html">← Gallery</a>
+  <div id="hint">AURORA · northern lights drifting slowly</div>
+  <div id="ui"><button id="btn-save">Save</button></div>
+  <script>
+    new p5(function(p){
+      let t=0;
+      const BANDS=[
+        {yFrac:0.68,h:0.22,r:0,g:220,b:120,ns:0.0018,sp:0.00025},
+        {yFrac:0.52,h:0.18,r:0,g:200,b:210,ns:0.0015,sp:0.0002},
+        {yFrac:0.40,h:0.15,r:60,g:80,b:255,ns:0.0017,sp:0.00022},
+        {yFrac:0.30,h:0.12,r:160,g:0,b:240,ns:0.0012,sp:0.00015},
+        {yFrac:0.20,h:0.08,r:220,g:0,b:180,ns:0.001,sp:0.0001}
+      ];
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');p.frameRate(60);p.noStroke();};
+      p.draw=function(){
+        t+=0.003;
+        p.background(4,4,18);
+        // stars
+        p.randomSeed(7);
+        for(let i=0;i<220;i++){
+          const sx=p.random(p.width),sy=p.random(p.height*0.85);
+          const br=80+Math.sin(t*0.4+i*0.3)*40;
+          p.fill(br+20,br+20,br+50,160);
+          p.ellipse(sx,sy,p.random(0.5,1.8));
+        }
+        BANDS.forEach((band,bi)=>{
+          for(let layer=5;layer>=0;layer--){
+            const alpha=p.map(layer,0,5,55,5);
+            const yBase=p.height*band.yFrac+layer*18;
+            p.fill(band.r,band.g,band.b,alpha);
+            p.beginShape();
+            p.vertex(0,p.height);
+            for(let x=0;x<=p.width;x+=5){
+              const n=p.noise(x*band.ns+bi*80,t*band.sp*400+bi*10);
+              p.vertex(x,yBase-n*p.height*band.h);
+            }
+            p.vertex(p.width,p.height);
+            p.endShape(p.CLOSE);
+          }
+        });
+      };
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);};
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('aurora','png');});
+    });
+  </script>
+</body>
+</html>

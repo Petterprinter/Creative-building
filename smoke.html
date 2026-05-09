@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smoke</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
+  </style>
+</head>
+<body>
+  <a id="back" href="index.html">← Gallery</a>
+  <div id="hint">SMOKE · wisps rising slowly into the dark</div>
+  <div id="ui"><button id="btn-save">Save</button></div>
+  <script>
+    new p5(function(p){
+      let particles=[],t=0;
+      const COUNT=180;
+      function makePt(randomY){
+        const pt={x:p.width/2+p.random(-p.width*0.12,p.width*0.12),y:p.height+10,vx:0,vy:p.random(-0.35,0.18),size:p.random(18,45),alpha:0,maxAlpha:p.random(35,85),age:0,maxAge:p.random(400,750)};
+        if(randomY){pt.y=p.random(p.height);pt.age=p.random(pt.maxAge);}
+        return pt;
+      }
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');p.frameRate(60);p.noStroke();particles=Array.from({length:COUNT},()=>makePt(true));};
+      p.draw=function(){
+        t+=0.004;p.background(10,10,15);
+        while(particles.length<COUNT)particles.push(makePt(false));
+        for(let i=particles.length-1;i>=0;i--){
+          const pt=particles[i];pt.age++;
+          const n=p.noise(pt.x*0.004,pt.y*0.004,t);
+          pt.vx+=(n-0.5)*0.05;pt.vx*=0.97;
+          pt.x+=pt.vx;pt.y+=pt.vy;pt.size+=0.06;
+          const life=pt.age/pt.maxAge;
+          pt.alpha=life<0.2?p.map(life,0,0.2,0,pt.maxAlpha):p.map(life,0.2,1,pt.maxAlpha,0);
+          if(pt.age>=pt.maxAge){particles.splice(i,1);continue;}
+          const tint=p.map(pt.y,0,p.height,230,190);
+          p.fill(tint,tint,tint+20,pt.alpha);
+          p.ellipse(pt.x,pt.y,pt.size,pt.size*1.15);
+        }
+      };
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);particles=Array.from({length:COUNT},()=>makePt(true));};
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('smoke','png');});
+    });
+  </script>
+</body>
+</html>

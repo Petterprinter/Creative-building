@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mandala</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0f;overflow:hidden}canvas{display:block}
+    a#back,button{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:background 0.2s;font-family:system-ui,sans-serif;text-decoration:none}
+    a#back:hover,button:hover{background:rgba(255,255,255,0.18)}
+    #back{position:fixed;top:20px;left:24px;z-index:10}
+    #ui{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10}
+    #hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:12px;font-family:system-ui,sans-serif;letter-spacing:0.05em;pointer-events:none}
+  </style>
+</head>
+<body>
+  <a id="back" href="index.html">← Gallery</a>
+  <div id="hint">MANDALA · breathes and rotates slowly</div>
+  <div id="ui">
+    <button id="btn-palette">Palette</button>
+    <button id="btn-save">Save</button>
+  </div>
+  <script>
+    const PALETTES=[['#9b5de5','#c77dff','#e0aaff','#7b2d8b','#5a189a'],['#00f5d4','#00bbf9','#48cae4','#023e8a','#0096c7'],['#f15bb5','#ff6b6b','#ffa94d','#fee440','#e9c46a'],['#74c69d','#40916c','#2d6a4f','#95d5b2','#b7e4c7'],['#fff','#ddd','#aaa','#888','#555']];
+    let palIdx=0;
+    new p5(function(p){
+      let t=0;
+      p.setup=function(){const cnv=p.createCanvas(p.windowWidth,p.windowHeight);cnv.style('display','block');p.frameRate(60);};
+      p.draw=function(){
+        t+=0.007;p.background(10,10,15);
+        p.translate(p.width/2,p.height/2);
+        const breathe=1+Math.sin(t*0.25)*0.10;
+        const pal=PALETTES[palIdx];
+        const maxR=Math.min(p.width,p.height)*0.42;
+        for(let ring=0;ring<6;ring++){
+          const radius=(ring+1)*(maxR/6)*breathe;
+          const count=(ring+2)*6;
+          const rot=t*0.006*(ring%2===0?1:-1);
+          const col=p.color(pal[ring%pal.length]);
+          col.setAlpha(p.map(ring,0,5,210,70));
+          p.stroke(col);p.strokeWeight(0.9);p.noFill();
+          for(let i=0;i<count;i++){
+            const angle=(i/count)*p.TWO_PI+rot;
+            const x=Math.cos(angle)*radius,y=Math.sin(angle)*radius;
+            p.push();p.translate(x,y);p.rotate(angle+t*0.015*(ring%2===0?1:-1));
+            const sz=6+ring*3.5;
+            if(ring%3===0){p.triangle(0,-sz,-sz*0.87,sz*0.5,sz*0.87,sz*0.5);}
+            else if(ring%3===1){p.ellipse(0,0,sz*1.6,sz*1.6);}
+            else{p.line(-sz,0,sz,0);p.line(0,-sz,0,sz);}
+            p.pop();
+          }
+          col.setAlpha(p.map(ring,0,5,50,15));p.stroke(col);p.strokeWeight(0.4);
+          p.ellipse(0,0,radius*2,radius*2);
+        }
+        p.noStroke();p.fill(255,255,255,160);p.ellipse(0,0,5*breathe,5*breathe);
+      };
+      p.windowResized=function(){p.resizeCanvas(p.windowWidth,p.windowHeight);};
+      document.getElementById('btn-palette').addEventListener('click',()=>{palIdx=(palIdx+1)%PALETTES.length;});
+      document.getElementById('btn-save').addEventListener('click',()=>{p.saveCanvas('mandala','png');});
+    });
+  </script>
+</body>
+</html>
